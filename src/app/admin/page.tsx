@@ -69,7 +69,7 @@ export default function AdminPage() {
             } else {
                 setMessage({ type: 'error', text: data.error || data.message || 'Upload failed' });
             }
-        } catch (err) {
+        } catch {
             setMessage({ type: 'error', text: 'An unexpected error occurred.' });
         } finally {
             setUploading(false);
