@@ -4,9 +4,9 @@ A production-ready AI chatbot for kenmarkitan.com that uses RAG (Retrieval-Augme
 
 ## Tech Stack
 - **Frontend**: Next.js 15 (App Router), TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes
+- **Backend**: Next.js API Routes (Serverless compatible)
 - **Database**: MongoDB (via Prisma v5)
-- **AI Engine**: Ollama (Llama 3.2, Nomic Embed Text)
+- **AI Engine**: Groq (Llama 3 8B) + Transformers.js (Deep and lightweight embeddings)
 - **Vector Search**: Cosine similarity (in-memory/On-demand)
 
 ## Setup Instructions
@@ -22,29 +22,20 @@ A production-ready AI chatbot for kenmarkitan.com that uses RAG (Retrieval-Augme
     npm install
     ```
 
-3.  **Configure Database**:
-    - Ensure you have a MongoDB instance running (local or Atlas).
-    - Create a `.env` file in the root directory:
-      ```env
-      DATABASE_URL="your-mongodb-connection-string"
-      ```
+3.  **Environment Variables**:
+    Create a `.env` file:
+    ```env
+    DATABASE_URL="your-mongodb-connection-string"
+    GROQ_API_KEY="your-groq-api-key"
+    ```
 
-4.  **Setup Ollama**:
-    - Install [Ollama](https://ollama.com/).
-    - Pull the required models:
-      ```bash
-      ollama pull llama3.2:3b
-      ollama pull nomic-embed-text
-      ```
-    - Ensure Ollama is running (`ollama serve`).
-
-5.  **Initialize Database**:
+4.  **Initialize Database**:
     ```bash
     npx prisma generate
     npx prisma db push
     ```
 
-6.  **Run Development Server**:
+5.  **Run Development Server**:
     ```bash
     npm run dev
     ```
@@ -54,14 +45,23 @@ A production-ready AI chatbot for kenmarkitan.com that uses RAG (Retrieval-Augme
 
 1.  Navigate to `/admin` (e.g., `http://localhost:3000/admin`).
 2.  Upload the included sample file: `public/demo_knowledge.xlsx`.
-3.  The system will parse the file, generate embeddings with `search_document:` prefix, and store them in MongoDB.
+3.  The system uses `@xenova/transformers` (WASM) to generate embeddings locally on the server—no external embedding API needed!
 
-## Deployment Notes
+## Deployment (Vercel)
 
-- **Vercel/Netlify**: The frontend and API routes can be deployed to Vercel.
-- **AI/Ollama**: Since Ollama runs locally, for a production deployment you must either:
-  - Host Ollama on a VPS (e.g., DigitalOcean, AWS EC2) and expose it via ngrok/tailscale.
-  - Use an external LLM provider key (OpenAI/Anthropic) by modifying `src/lib/ollama.ts`.
+This project is **Vercel-ready**:
+1.  Push code to GitHub.
+2.  Import project in Vercel.
+3.  Add `DATABASE_URL` and `GROQ_API_KEY` in Vercel Settings > Environment Variables.
+4.  Deploy!
+
+## Architecture
+
+1.  **User Query**: User types a question.
+2.  **Embedding**: Next.js Serverless Function runs `all-MiniLM-L6-v2` via WASM to vectorize the query.
+3.  **Retrieval**: System searches MongoDB for matching vectors.
+4.  **Generation**: Retrieved context is sent to **Groq API** (Llama 3).
+5.  **Response**: High-speed answer returned to user.
 
 ## Deliverables
 - **Codebase**: Complete Next.js project.

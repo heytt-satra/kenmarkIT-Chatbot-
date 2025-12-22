@@ -24,23 +24,23 @@ export async function POST(req: NextRequest) {
 
         // Process in batches or one by one. For simplicity, one by one.
         for (const entry of entries) {
-            try {
-                const embedding = await generateEmbedding(entry.answer, 'document');
+            // try {
+            const embedding = await generateEmbedding(entry.answer, 'document');
 
-                await prisma.knowledgeEntry.create({
-                    data: {
-                        category: entry.category,
-                        question: entry.question,
-                        answer: entry.answer,
-                        source: entry.source,
-                        embedding: embedding,
-                    },
-                });
-                addedCount++;
-            } catch (err) {
-                console.error(`Failed to add entry: ${entry.question}`, err);
-                // Continue with others
-            }
+            await prisma.knowledgeEntry.create({
+                data: {
+                    category: entry.category,
+                    question: entry.question,
+                    answer: entry.answer,
+                    source: entry.source,
+                    embedding: embedding,
+                },
+            });
+            addedCount++;
+            // } catch (err) {
+            //    console.error(`Failed to add entry: ${entry.question}`, err);
+            //    // Continue with others
+            // }
         }
 
         return NextResponse.json({
