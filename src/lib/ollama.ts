@@ -7,12 +7,12 @@ const Groq = require('groq-sdk');
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let embeddingPipeline: any = null;
 
-// Initialize Groq Client
-const apiKey = process.env.GROQ_API_KEY;
-if (!apiKey) {
-    console.warn("GROQ_API_KEY is missing from environment variables!");
-}
-const groq = new Groq({ apiKey: apiKey || 'dummy_key' });
+// Initialize Groq Client Lazily
+// const apiKey = process.env.GROQ_API_KEY;
+// if (!apiKey) {
+//     console.warn("GROQ_API_KEY is missing from environment variables!");
+// }
+// const groq = new Groq({ apiKey: apiKey || 'dummy_key' });
 
 export async function generateEmbedding(text: string, type: 'query' | 'document' = 'document'): Promise<number[]> {
     try {
@@ -20,7 +20,13 @@ export async function generateEmbedding(text: string, type: 'query' | 'document'
             console.log('Initializing transformer pipeline...');
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore - dynamic import handling
-            const { pipeline } = await import('@xenova/transformers');
+            const { pipeline, env } = await import('@xenova/transformers');
+
+            // Configure WASM to avoid deadlocks/crashes
+            if (env && env.backends && env.backends.onnx && env.backends.onnx.wasm) {
+                env.backends.onnx.wasm.numThreads = 1;
+                env.backends.onnx.wasm.simd = true;
+            }
 
             // Use a smaller, efficient model suitable for CPU/Edge
             embeddingPipeline = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
@@ -41,6 +47,9 @@ export async function generateEmbedding(text: string, type: 'query' | 'document'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function generateCompletion(prompt: string, model = 'llama-3.1-8b-instant'): Promise<string> {
     try {
+        const apiKey = process.env.GROQ_API_KEY;
+        const groq = new Groq({ apiKey: apiKey || 'dummy_key' });
+
         console.log(`Calling Groq API with model ${model}...`);
         const chatCompletion = await groq.chat.completions.create({
             messages: [

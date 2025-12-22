@@ -2,15 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  webpack: (config, { isServer }) => {
+  webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
       "sharp$": false,
+      "onnxruntime-node$": false,
     };
-    // Fix for onnxruntime-node binaries - treat as external
-    if (isServer) {
-      config.externals.push('onnxruntime-node', 'sharp');
-    }
     return config;
   },
 };

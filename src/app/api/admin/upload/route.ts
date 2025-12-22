@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { parseExcel } from '@/lib/excel-parser';
 import { generateEmbedding } from '@/lib/ollama';
 import { prisma } from '@/utils/db';
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
     try {

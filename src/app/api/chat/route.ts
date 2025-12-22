@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processQuery } from '@/lib/rag';
 import { prisma } from '@/utils/db';
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
     try {
