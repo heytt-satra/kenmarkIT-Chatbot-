@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model KnowledgeEntry {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  category  String
+  question  String
+  answer    String
+  embedding Json     // Stored as an array of floats
+  source    String
+  createdAt DateTime @default(now())
+}
+
+model ChatLog {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId   String
+  userMessage String
+  botResponse String
+  timestamp   DateTime @default(now())
+}
