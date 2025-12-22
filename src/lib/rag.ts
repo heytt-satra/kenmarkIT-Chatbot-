@@ -43,7 +43,7 @@ export function findSimilar(queryEmbedding: number[], entries: KnowledgeEntry[],
 
 export async function processQuery(query: string, allEntries: KnowledgeEntry[]) {
     // 1. Generate embedding for query
-    const queryEmbedding = await generateEmbedding(query, 'query');
+    const queryEmbedding = await generateEmbedding(query);
 
     // 2. Find similar entries
     const sources = findSimilar(queryEmbedding, allEntries);

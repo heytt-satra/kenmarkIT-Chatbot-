@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
-        const entries = await parseExcel(buffer, file.name);
+        const entries = await parseExcel(buffer);
 
         if (entries.length === 0) {
             return NextResponse.json({ message: 'No valid entries found in Excel' }, { status: 400 });
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
         // Process in batches or one by one. For simplicity, one by one.
         for (const entry of entries) {
             // try {
-            const embedding = await generateEmbedding(entry.answer, 'document');
+            const embedding = await generateEmbedding(entry.answer);
 
             await prisma.knowledgeEntry.create({
                 data: {

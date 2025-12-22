@@ -14,7 +14,7 @@ let embeddingPipeline: any = null;
 // }
 // const groq = new Groq({ apiKey: apiKey || 'dummy_key' });
 
-export async function generateEmbedding(text: string, type: 'query' | 'document' = 'document'): Promise<number[]> {
+export async function generateEmbedding(text: string): Promise<number[]> {
     try {
         if (!embeddingPipeline) {
             console.log('Initializing transformer pipeline...');

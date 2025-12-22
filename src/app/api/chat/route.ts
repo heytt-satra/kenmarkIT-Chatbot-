@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
         const allEntries = await prisma.knowledgeEntry.findMany();
 
         // 2. Process query via RAG
-        const { response, sources } = await processQuery(message, allEntries, sessionId);
+        const { response, sources } = await processQuery(message, allEntries);
 
         // 3. Save chat log
         await prisma.chatLog.create({
