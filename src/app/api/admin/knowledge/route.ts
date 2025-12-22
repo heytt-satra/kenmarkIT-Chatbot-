@@ -33,8 +33,9 @@ export async function GET(req: NextRequest) {
             entries
         });
 
-    } catch (error: any) {
-        console.error('Fetch knowledge error:', error);
-        return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    } catch (error: unknown) {
+        console.error('Fetch error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }

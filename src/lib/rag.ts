@@ -41,7 +41,7 @@ export function findSimilar(queryEmbedding: number[], entries: KnowledgeEntry[],
         .slice(0, topK);
 }
 
-export async function processQuery(query: string, allEntries: KnowledgeEntry[], sessionId?: string) {
+export async function processQuery(query: string, allEntries: KnowledgeEntry[]) {
     // 1. Generate embedding for query
     const queryEmbedding = await generateEmbedding(query, 'query');
 

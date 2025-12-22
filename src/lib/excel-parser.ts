@@ -1,55 +1,42 @@
 import * as XLSX from 'xlsx';
+import { KnowledgeEntry } from '@prisma/client';
 
-export interface KnowledgeItem {
-  category: string;
-  question: string;
-  answer: string;
-  source: string;
+interface ExcelRow {
+  Category?: string;
+  Question?: string;
+  Answer?: string;
+  Source?: string;
+  [key: string]: string | undefined;
 }
 
-export async function parseExcel(buffer: Buffer, filename: string): Promise<KnowledgeItem[]> {
+// Helper type to match the expected return structure (excluding DB fields)
+export type ParsedKnowledgeEntry = Omit<KnowledgeEntry, 'id' | 'createdAt' | 'embedding'>;
+
+export async function parseExcel(buffer: Buffer): Promise<ParsedKnowledgeEntry[]> {
   const workbook = XLSX.read(buffer, { type: 'buffer' });
-  const items: KnowledgeItem[] = [];
+  if (workbook.SheetNames.length === 0) return [];
 
-  workbook.SheetNames.forEach((sheetName: string) => {
-    const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+  const sheetName = workbook.SheetNames[0];
+  const sheet = workbook.Sheets[sheetName];
 
-    if (!jsonData || jsonData.length === 0) return;
+  // Use 'unknown' first to safely cast
+  const data = XLSX.utils.sheet_to_json(sheet) as unknown[];
 
-    // Assuming first row is header. Find indices case-insensitively
-    const header = jsonData[0];
-    if (!header) return;
+  const entries: ParsedKnowledgeEntry[] = [];
 
-    const catIdx = header.findIndex((h: any) => h?.toString().toLowerCase().trim() === 'category');
-    const qIdx = header.findIndex((h: any) => h?.toString().toLowerCase().trim() === 'question');
-    const aIdx = header.findIndex((h: any) => h?.toString().toLowerCase().trim() === 'answer');
+  // Iterate safely
+  for (const row of data) {
+    // Cast row to ExcelRow for property access
+    const excelRow = row as ExcelRow;
 
-    // If columns are missing, skip this sheet (or try to process if some exist?)
-    // Requirement implies strict structure, so skipping is safer to avoid garbage data.
-    if (qIdx === -1 || aIdx === -1) {
-        console.warn(`Sheet "${sheetName}" missing 'Question' or 'Answer' column. Skipping.`);
-        return; 
+    if (excelRow.Question && excelRow.Answer) {
+      entries.push({
+        category: excelRow.Category || 'General',
+        question: excelRow.Question,
+        answer: excelRow.Answer,
+        source: excelRow.Source || 'Uploaded File'
+      });
     }
-
-    for (let i = 1; i < jsonData.length; i++) {
-        const row = jsonData[i];
-        if (!row) continue;
-        
-        const category = catIdx !== -1 ? row[catIdx]?.toString() || 'General' : 'General';
-        const question = row[qIdx]?.toString();
-        const answer = row[aIdx]?.toString();
-
-        if (question && answer) {
-            items.push({
-                category: category.trim(),
-                question: question.trim(),
-                answer: answer.trim(),
-                source: filename
-            });
-        }
-    }
-  });
-
-  return items;
+  }
+  return entries;
 }

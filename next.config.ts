@@ -6,8 +6,13 @@ const nextConfig: NextConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       "sharp$": false,
-      "onnxruntime-node$": false,
     };
+    // Fix for onnxruntime-node binaries
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    config.module.rules.push({
+      test: /\.node$/,
+      use: 'node-loader',
+    });
     return config;
   },
 };

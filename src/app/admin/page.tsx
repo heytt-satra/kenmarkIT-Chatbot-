@@ -25,9 +25,9 @@ export default function AdminPage() {
             const data = await res.json();
             setEntries(data.entries);
             setStats({ total: data.total });
-        } catch (err) {
-            console.error('Failed to fetch knowledge', err);
-        }
+        } catch {
+            setMessage({ type: 'error', text: 'Failed to load stats' });
+        };
     };
 
     useEffect(() => {

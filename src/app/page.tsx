@@ -1,5 +1,5 @@
 import Chatbot from '@/components/Chatbot';
-import { ArrowRight, Bot, Database, Zap } from 'lucide-react';
+import { Bot, Database, Zap } from 'lucide-react';
 
 export default function Home() {
   return (
