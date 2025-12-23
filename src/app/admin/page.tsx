@@ -23,10 +23,17 @@ export default function AdminPage() {
         try {
             const res = await fetch('/api/admin/knowledge?limit=50');
             const data = await res.json();
-            setEntries(data.entries);
-            setStats({ total: data.total });
-        } catch {
-            setMessage({ type: 'error', text: 'Failed to load stats' });
+
+            if (res.ok && data.entries) {
+                setEntries(data.entries);
+                setStats({ total: data.total || 0 });
+            } else {
+                throw new Error(data.error || 'Failed to fetch entries');
+            }
+        } catch (error) {
+            console.error(error);
+            setMessage({ type: 'error', text: 'Failed to load knowledge entries. Check database connection.' });
+            setEntries([]);
         };
     };
 
