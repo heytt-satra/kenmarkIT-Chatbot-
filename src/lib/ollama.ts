@@ -44,7 +44,6 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function generateCompletion(prompt: string, model = 'llama-3.1-8b-instant'): Promise<string> {
     try {
         const apiKey = process.env.GROQ_API_KEY;
