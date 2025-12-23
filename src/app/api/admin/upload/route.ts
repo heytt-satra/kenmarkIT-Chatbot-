@@ -24,24 +24,29 @@ export async function POST(req: NextRequest) {
         let addedCount = 0;
 
         // Process in batches or one by one. For simplicity, one by one.
-        for (const entry of entries) {
-            // try {
-            const embedding = await generateEmbedding(entry.answer);
+        const validEntries = [];
 
-            await prisma.knowledgeEntry.create({
-                data: {
+        // Generate embeddings first
+        for (const entry of entries) {
+            try {
+                const embedding = await generateEmbedding(entry.answer);
+                validEntries.push({
                     category: entry.category,
                     question: entry.question,
                     answer: entry.answer,
                     source: entry.source,
                     embedding: embedding,
-                },
+                });
+            } catch (e) {
+                console.error(`Failed to enable embedding for: ${entry.question}`, e);
+            }
+        }
+
+        if (validEntries.length > 0) {
+            await prisma.knowledgeEntry.createMany({
+                data: validEntries,
             });
-            addedCount++;
-            // } catch (err) {
-            //    console.error(`Failed to add entry: ${entry.question}`, err);
-            //    // Continue with others
-            // }
+            addedCount = validEntries.length;
         }
 
         return NextResponse.json({
