@@ -43,9 +43,12 @@ export async function POST(req: NextRequest) {
         }
 
         if (validEntries.length > 0) {
-            await prisma.knowledgeEntry.createMany({
-                data: validEntries,
-            });
+            // Use Promise.all to insert in parallel, bypassing createMany's transaction requirement
+            await Promise.all(validEntries.map(entry =>
+                prisma.knowledgeEntry.create({
+                    data: entry
+                })
+            ));
             addedCount = validEntries.length;
         }
 
