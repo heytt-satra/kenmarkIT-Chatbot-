@@ -43,13 +43,17 @@ export async function POST(req: NextRequest) {
         }
 
         if (validEntries.length > 0) {
-            // Use Promise.all to insert in parallel, bypassing createMany's transaction requirement
-            await Promise.all(validEntries.map(entry =>
-                prisma.knowledgeEntry.create({
-                    data: entry
-                })
-            ));
-            addedCount = validEntries.length;
+            // Process sequentially to be safe against DB constraints
+            for (const entry of validEntries) {
+                try {
+                    await prisma.knowledgeEntry.create({
+                        data: entry
+                    });
+                    addedCount++;
+                } catch (innerError) {
+                    console.error('Insert failed for entry:', entry.question.substring(0, 20), innerError);
+                }
+            }
         }
 
         return NextResponse.json({
